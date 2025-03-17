@@ -57,12 +57,17 @@ def AjoutAlphaOmega(data):
 
 def afficherSimple(data):
     # Analyse des données
+    lines = data.strip().split('\n')
     mat = []
     durees = {}
     liens = []
 
     # Stocker les durées pour chaque sommet
-    for sommet, duree, predecesseurs in data:
+    for line in lines:
+        elements = [int(x) for x in line.strip().split()]
+        sommet = elements[0]
+        duree = elements[1]
+        predecesseurs = elements[2:]
         mat.append((sommet, duree, predecesseurs))
         durees[sommet] = duree
 
@@ -78,6 +83,7 @@ def afficherSimple(data):
     # Afficher les liens triés
     for pred, sommet, duree in liens:
         print(f"{pred} -> {sommet} : {duree}")
+
 
 
 def afficherMatrice(data):
@@ -133,5 +139,5 @@ def afficherMatrice(data):
 
 data = loadficher()
 mat = AjoutAlphaOmega(data)
-afficherSimple(mat)
+afficherSimple(data)
 afficherMatrice(mat)
