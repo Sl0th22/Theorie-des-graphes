@@ -1,4 +1,10 @@
-with open('table 3.txt', 'r', encoding='utf-8') as fichier:
+print("Quel table voulez-vous afficher ? Donnez un nombre entre 1 et 14")
+nb = input()
+while not nb.isdigit() or int(nb) < 1 or int(nb) > 14:
+    print("Veuillez entrer un nombre entre 1 et 14")
+    nb = input()
+
+with open('table '+ nb + '.txt', 'r', encoding='utf-8') as fichier:
     data = fichier.read()
 
 # Analyse des données
