@@ -51,10 +51,6 @@ def AjoutAlphaOmega(data):
     # Affichage de la matrice résultante
     print(mat)
     return mat
-
-
-
-
 def afficherSimple(data):
     # Analyse des données
     lines = data.strip().split('\n')
@@ -83,9 +79,6 @@ def afficherSimple(data):
     # Afficher les liens triés
     for pred, sommet, duree in liens:
         print(f"{pred} -> {sommet} : {duree}")
-
-
-
 def afficherMatrice(data):
     # Analyse des données
     mat = []
@@ -136,7 +129,60 @@ def afficherMatrice(data):
     print("    " + "---" * len(sommets))
 
 
-#def VerifCircuit(data):
+def VerifCircuit(data):
+    lines = data.strip().split('\n')
+    mat = []
+    durees = {}
+
+    for line in lines:
+        elements = [int(x) for x in line.strip().split()]
+        sommet = elements[0]
+        duree = elements[1]
+        predecesseurs = elements[2:]
+        mat.append((sommet, duree, predecesseurs))
+        durees[sommet] = duree
+
+    # Étape 2 : Initialiser les degrés d'entrée
+    sommets = set(durees.keys())
+    degres_entree = {}
+    for s in sommets:
+        degres_entree[s] = 0
+
+    for tache in mat:
+        for pred in tache[2]:  # prédécesseurs
+            degres_entree[tache[0]] += 1
+            
+    # Étape 3 : suppression des points d'entrée
+    reste = set(sommets)
+    print("Début de la détection de circuit :")
+
+    while True:
+        # Chercher les sommets avec degré d'entrée 0
+        points_entree = []
+        for s in reste:
+            if degres_entree[s] == 0:
+                points_entree.append(s)
+
+        if not points_entree:
+            break  # Aucun point d'entrée → cycle possible
+        print(f"Points d’entrée : {points_entree}")
+        
+        for s in points_entree:
+            reste.remove(s)
+            # Supprimer s des listes de prédécesseurs des autres tâches
+            for tache in mat:
+                if s in tache[2]:
+                    tache[2].remove(s)
+                    degres_entree[tache[0]] -= 1
+
+    # Étape 4 : Conclusion
+    if reste:
+        print("Circuit détecté ! Sommets restants bloqués :", reste)
+        return False
+    else:
+        print("Aucun circuit détecté. Le graphe est valide pour l’ordonnancement.")
+        return True
+  
 
 def ArcValeurNegative(data):
     lines = data.strip().split('\n')
@@ -151,26 +197,9 @@ def ArcValeurNegative(data):
             break
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 data = loadficher()
 #mat = AjoutAlphaOmega(data)
 #afficherSimple(data)
 #afficherMatrice(mat)
-ArcValeurNegative(data)
+#ArcValeurNegative(data)$
+VerifCircuit(data)
