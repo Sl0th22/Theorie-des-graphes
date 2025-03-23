@@ -136,8 +136,41 @@ def afficherMatrice(data):
     print("    " + "---" * len(sommets))
 
 
+#def VerifCircuit(data):
+
+def ArcValeurNegative(data):
+    lines = data.strip().split('\n')
+    for line in lines:
+        elements = [int(x) for x in line.strip().split()]
+        duree = elements[1]
+        if duree < 0:
+            print("Arc negatif")
+            break
+        else:
+            print("Arc positif")
+            break
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 data = loadficher()
-mat = AjoutAlphaOmega(data)
-afficherSimple(data)
-afficherMatrice(mat)
+#mat = AjoutAlphaOmega(data)
+#afficherSimple(data)
+#afficherMatrice(mat)
+ArcValeurNegative(data)
