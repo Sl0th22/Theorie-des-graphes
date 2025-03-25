@@ -210,6 +210,7 @@ def succduree(mat):
             successeurs[pred].append(sommet)
 
     return duree2, successeurs
+
 def tri_topologique(mat):
     nb_sommets = max(tache[0] for tache in mat) + 1
     degres_entree = [0] * nb_sommets
@@ -229,13 +230,13 @@ def tri_topologique(mat):
     ordre_topologique = []
 
     while temp:
-        u = temp.popleft()
-        ordre_topologique.append(u)
-        for v in succ[u]:
-            degres_entree[v] -= 1
-            if degres_entree[v] == 0:
-                rangs[v] = rangs[u] + 1
-                temp.append(v)
+        j = temp.popleft()
+        ordre_topologique.append(j)
+        for k in succ[j]:
+            degres_entree[k] -= 1
+            if degres_entree[k] == 0:
+                rangs[k] = rangs[j] + 1
+                temp.append(k)
     if -1 in rangs:
         print("Le graphe contient un cycle donc le tri topologique impossible.")
         return None
@@ -248,21 +249,39 @@ def tri_topologique(mat):
     print(ordre_topologique)
 
     return ordre_topologique
-def calendrier_plus_tot(duree2, succ,topo):
-    N = len(duree2)
-    tot = [0] * N
 
-    for u in topo:
-        for v in succ[u]:
-            tot[v] = max(tot[v], tot[u] + duree2[u])
+def calendrier_plus_tot(duree2, succ,topo):
+    a = len(duree2)
+    tot = [0] * a
+
+    for i in topo:
+        for j in succ[i]:
+            tot[j] = max(tot[j], tot[i] + duree2[i])
 
     print("\nTOT")
     print("Tâche | plus tôt")
     print("------------------")
-    for i in range(N):
+    for i in range(a):
         print(f"{i:5} | {tot[i]:9}")
 
     return tot
+
+def calendrier_plus_tard(duree2, succ, topo, tot):
+    a = len(duree2)
+    duree = max(tot) 
+    tard = [duree] * a
+
+    for i in reversed(topo):
+        for j in succ[i]:
+            tard[i] = min(tard[i], tard[j] - duree2[i])
+    
+    print("\nTARD")
+    print("Tâche | plus tard")
+    print("------------------")
+    for i in range(a):
+        print(f"{i:5} | {tard[i]:9}")
+    
+    return tard
 
 data = loadficher()
 mat = AjoutAlphaOmega(data)
@@ -274,4 +293,5 @@ succduree(mat)
 duree2, succ = succduree(mat)
 tri_topologique(mat)
 topo = tri_topologique(mat)
-calendrier_plus_tot(duree2, succ,topo)
+tot=calendrier_plus_tot(duree2, succ,topo)
+tard = calendrier_plus_tard(duree2, succ, topo, tot)
