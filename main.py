@@ -138,6 +138,6 @@ def afficherMatrice(data):
 
 
 data = loadficher()
-mat = AjoutAlphaOmega(data)
 afficherSimple(data)
+mat = AjoutAlphaOmega(data)
 afficherMatrice(mat)
