@@ -221,14 +221,14 @@ def tri_topologique(mat):
         for pred in predecesseurs:
             degres_entree[sommet] += 1
             succ[pred].append(sommet)
+    
     temp = deque()
-
     for i in range(nb_sommets):
         if degres_entree[i] == 0:
             temp.append(i)
             rangs[i] = 0
+    
     ordre_topologique = []
-
     while temp:
         j = temp.popleft()
         ordre_topologique.append(j)
@@ -237,51 +237,130 @@ def tri_topologique(mat):
             if degres_entree[k] == 0:
                 rangs[k] = rangs[j] + 1
                 temp.append(k)
+    
     if -1 in rangs:
         print("Le graphe contient un cycle donc le tri topologique impossible.")
         return None
+    
+    taches_par_rang = {}
+    for sommet in range(nb_sommets):
+        rang = rangs[sommet]
+        if rang not in taches_par_rang:
+            taches_par_rang[rang] = []
+        taches_par_rang[rang].append(sommet)
+    
+    print("\nRang | Tâches")
+    print("-----|-------")
+    for rang in sorted(taches_par_rang.keys()):
+        taches = ", ".join(map(str, taches_par_rang[rang]))
+        print(f"{rang:4} | {taches}")
+    
+    return ordre_topologique, rangs  
 
-    print("\n Rangs des sommets :")
-    for i in range(nb_sommets):
-        print(f"Sommet {i} : rang = {rangs[i]}")
-
-    print("\n Ordre topologique :")
-    print(ordre_topologique)
-
-    return ordre_topologique
-
-def calendrier_plus_tot(duree2, succ,topo):
+def calendrier_plus_tot(duree2, succ, topo, rangs):
     a = len(duree2)
     tot = [0] * a
+    pred_tot = [None] * a 
 
     for i in topo:
         for j in succ[i]:
-            tot[j] = max(tot[j], tot[i] + duree2[i])
+            if tot[j] < tot[i] + duree2[i]:
+                tot[j] = tot[i] + duree2[i]
+                pred_tot[j] = i
+    
+    print("\nDate au plus tôt")
+    print("Rang | Tâche | Date au plus tôt(origine)")
+    print("-----|-------|--------------------------")
+    
+    taches_par_rang = {}
+    for sommet in range(a):
+        rang = rangs[sommet]
+        if rang not in taches_par_rang:
+            taches_par_rang[rang] = []
+        taches_par_rang[rang].append(sommet)
+  
+    for rang in sorted(taches_par_rang.keys()):
+        for sommet in taches_par_rang[rang]:
+            origine = f"({pred_tot[sommet]})" if pred_tot[sommet] is not None else "(None)"
+            print(f"{rang:4} | {sommet:5} | {tot[sommet]:4}{origine:>10}")
+    
+    return tot, pred_tot
 
-    print("\nTOT")
-    print("Tâche | plus tôt")
-    print("------------------")
-    for i in range(a):
-        print(f"{i:5} | {tot[i]:9}")
-
-    return tot
-
-def calendrier_plus_tard(duree2, succ, topo, tot):
+def calendrier_plus_tard(duree2, succ, topo, tot, rangs):
     a = len(duree2)
     duree = max(tot) 
     tard = [duree] * a
+    pred_tard = [None] * a  
 
     for i in reversed(topo):
         for j in succ[i]:
-            tard[i] = min(tard[i], tard[j] - duree2[i])
+            if tard[i] > tard[j] - duree2[i]:
+                tard[i] = tard[j] - duree2[i]
+                pred_tard[i] = j
     
-    print("\nTARD")
-    print("Tâche | plus tard")
-    print("------------------")
-    for i in range(a):
-        print(f"{i:5} | {tard[i]:9}")
+    print("\nDate au plus tard")
+    print("Rang | Tâche | Date au plus tard")
+    print("-----|-------|------------------")
     
-    return tard
+    taches_par_rang = {}
+    for sommet in range(a):
+        rang = rangs[sommet]
+        if rang not in taches_par_rang:
+            taches_par_rang[rang] = []
+        taches_par_rang[rang].append(sommet)
+    
+    for rang in sorted(taches_par_rang.keys()):
+        for sommet in taches_par_rang[rang]:
+            print(f"{rang:4} | {sommet:5} | {tard[sommet]:4}")
+    
+    return tard, pred_tard
+
+def cheminscritiques(tot, tard, duree2, succ):
+    marges = [tard[i] - tot[i] for i in range(len(tot))]
+    tachesc = [i for i in range(len(marges)) if marges[i] == 0]
+    #print("\nMarges test")
+    #for i in range(len(marges)):
+        #print(f"{i:5} | {marges[i]:5}")
+    tc = {t: [] for t in tachesc}
+    for i in tachesc:
+        for j in succ[i]:
+            if j in tachesc:
+                tc[i].append(j)
+    
+    return tc
+
+def tchemins(depart, arrivee, tc, chemin_actuel=None):
+    if chemin_actuel is None:
+        chemin_actuel = []
+    chemin_actuel = chemin_actuel + [depart]
+    
+    if depart == arrivee:
+        return [chemin_actuel]
+    
+    if depart not in tc:
+        return []
+    
+    chemins = []
+    for suivant in tc[depart]:
+        if suivant not in chemin_actuel:
+            nouveaux_chemins = tchemins(suivant, arrivee, tc, chemin_actuel)
+            for c in nouveaux_chemins:
+                chemins.append(c)
+    return chemins
+
+def afficherchemins(tot, tard, duree2, succ):
+    tc = cheminscritiques(tot, tard, duree2, succ)
+    alpha = 0
+    omega = len(tot) - 1
+    chemins_critiques = tchemins(alpha, omega, tc)
+    print("\nChemin(s) critique(s):")
+    if not chemins_critiques:
+        print("Aucun chemin critique trouvé.")
+    else:
+        for i, chemin in enumerate(chemins_critiques, 1):
+            print(f"Chemin critique {i}: {' -> '.join(map(str, chemin))}")
+    
+    return chemins_critiques
 
 data = loadficher()
 mat = AjoutAlphaOmega(data)
@@ -291,7 +370,8 @@ mat = AjoutAlphaOmega(data)
 #VerifCircuit(data)
 succduree(mat)
 duree2, succ = succduree(mat)
-tri_topologique(mat)
-topo = tri_topologique(mat)
-tot=calendrier_plus_tot(duree2, succ,topo)
-tard = calendrier_plus_tard(duree2, succ, topo, tot)
+duree2, succ = succduree(mat)
+topo, rangs = tri_topologique(mat)  
+tot, pred_tot = calendrier_plus_tot(duree2, succ, topo, rangs) 
+tard, pred_tard = calendrier_plus_tard(duree2, succ, topo, tot, rangs)  
+afficherchemins(tot, tard, duree2, succ)
