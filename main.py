@@ -318,13 +318,13 @@ def calendrier_plus_tard(duree2, succ, topo, tot, rangs):
 def cheminscritiques(tot, tard, duree2, succ):
     marges = [tard[i] - tot[i] for i in range(len(tot))]
     tachesc = [i for i in range(len(marges)) if marges[i] == 0]
-    #print("\nMarges test")
-    #for i in range(len(marges)):
-        #print(f"{i:5} | {marges[i]:5}")
+    print("\nMarges test")
+    for i in range(len(marges)):
+        print(f"{i:5} | {marges[i]:5}")
     tc = {t: [] for t in tachesc}
     for i in tachesc:
         for j in succ[i]:
-            if j in tachesc:
+            if j in tachesc and tot[i] + duree2[i] == tot[j]:
                 tc[i].append(j)
     
     return tc
